@@ -12,13 +12,9 @@ from . import models
 from .database import engine, get_db
 from sqlalchemy.orm import Session
 
-
-
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
 
 try:
   conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres',          password='199810', cursor_factory=RealDictCursor )
@@ -52,29 +48,40 @@ def root():
   return {"message":"hello folks"}
 
 @app.get("/sqlalchemy")
-def test_posts(db: Session =Depends(get_db)):
-  return{"status":"success for now"}
+def test_posts(db: Session = Depends(get_db)):
+  posts=db.query(models.Post).all()
+  print(posts)
+  return{"data":posts}
 
 @app.get("/posts")
-def posts():
+def posts(db: Session = Depends(get_db)):
   cursor.execute("""SELECT * FROM posts""")
-  posts=cursor.fetchall()
-  return{"data":posts}
+  # posts=cursor.fetchall()
+  # return{"data":posts}
+  #--------------------------------
   # return{"data":my_posts}
+  #--------------------------------
+  posts=db.query(models.Post).all()
+  return{"data":posts}
+
+  
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post):
+def create_post(post: Post, db: Session = Depends(get_db)):
   # post_dict = post.dict()
   # post_dict['id'] = randrange(0,100)
   # my_posts.append(post_dict)
   # return{"data":post_dict}
-  cursor.execute("""INSERT INTO posts (title, content, published) VALUES(%s, %s, %s) RETURNING * """,
-                (post.title, post.content, post.published))
-  new_post = cursor.fetchone()
-  conn.commit()
+  #--------------------------------
+  # cursor.execute("""INSERT INTO posts (title, content, published) VALUES(%s, %s, %s) RETURNING * """,
+  #               (post.title, post.content, post.published))
+  # new_post = cursor.fetchone()
+  # conn.commit()
+  # return{"data":new_post}
+  #--------------------------------
+  new_post=models.Post(title=post.title, content=post.content, published=post.published)
   return{"data":new_post}
   
-
 
 @app.get("/posts/{id}")
 def get_post(id: int, response: Response):
@@ -84,6 +91,7 @@ def get_post(id: int, response: Response):
   #   # response.status_code = status.HTTP_404_NOT_FOUND
   #   # return{"message":f"post with id {id} not found"}
   # return{"data":post}
+  #--------------------------------
   cursor.execute("""SELECT * FROM posts WHERE id = %s """,(str(id)))
   post=cursor.fetchone()
   if not post:
@@ -99,6 +107,7 @@ def delete_post(id:int):
   #   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id {id} was not found")
   # my_posts.pop(index)
   # return Response(status_code=status.HTTP_204_NO_CONTENT)
+  #--------------------------------
   cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING * """,(str(id)))
   deleted_post=cursor.fetchone()
   conn.commit()
@@ -118,6 +127,7 @@ def update_post(id:int, post:Post):
   # post_dict['id'] = id
   # my_posts[index]= post_dict
   # return{'data':post_dict}
+  #--------------------------------
   cursor.execute("""UPDATE posts SET title=%s, content=%s, published=%s WHERE id = %s RETURNING *""",(post.title, post.content, post.published, str(id)))
   updated_post = cursor.fetchone()
   conn.commit()
