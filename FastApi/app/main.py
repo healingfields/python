@@ -1,9 +1,9 @@
 from os import stat
-from typing import Optional, final
+from typing import Optional, final, List
 from urllib import response
 from fastapi.params import Body
 from fastapi import FastAPI, Response, status, HTTPException, Depends
-from .schemas import Post
+from .schemas import CreatePost, PostBase, PostResponse
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -49,7 +49,7 @@ def test_posts(db: Session = Depends(get_db)):
   print(posts)
   return{"data":posts}
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[PostResponse])
 def posts(db: Session = Depends(get_db)):
   cursor.execute("""SELECT * FROM posts""")
   # posts=cursor.fetchall()
@@ -58,12 +58,12 @@ def posts(db: Session = Depends(get_db)):
   # return{"data":my_posts}
   #--------------------------------
   posts=db.query(models.Post).all()
-  return{"data":posts}
+  return posts
 
   
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post, db: Session = Depends(get_db)):
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=PostResponse)
+def create_post(post: CreatePost, db: Session = Depends(get_db)):
   # post_dict = post.dict()
   # post_dict['id'] = randrange(0,100)
   # my_posts.append(post_dict)
@@ -80,10 +80,10 @@ def create_post(post: Post, db: Session = Depends(get_db)):
   db.commit()
   db.refresh(new_post)
   
-  return{"data":new_post}
+  return new_post
   
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=PostResponse)
 def get_post(id: int, response: Response, db: Session = Depends(get_db)):
   # post=find_post_by_id(id)
   # if not post:
@@ -101,7 +101,7 @@ def get_post(id: int, response: Response, db: Session = Depends(get_db)):
   post =db.query(models.Post).filter(models.Post.id==id).first()
   if not post:
     raise HTTPException(status_code=status.     HTTP_404_NOT_FOUND, detail=f"post with id {id} not found")
-  return{"data":post}
+  return post
 
 
  
@@ -129,16 +129,16 @@ def delete_post(id:int, db:Session = Depends(get_db)):
   post_to_delete.delete(synchronize_session=False)
   db.commit()
 
-  return Response(status_code=status.HTTP_404_NOT_FOUND)
+  return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 
 
 @app.put("/posts/{id}")
-def update_post(id:int, post:Post, db:Session = Depends(get_db)):
+def update_post(id:int, post:CreatePost, db:Session = Depends(get_db), response_model=PostResponse):
   # index = find_index_post(id)
   # if index == None:
-  #   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post withi id {id} was not found")
+  #   raise HTTPException(status_code=status.HTT, P_404_NOT_FOUND, detail=f"post withi id {id} was not found")
   
   # post_dict = post.dict()
   # post_dict['id'] = id
@@ -159,5 +159,5 @@ def update_post(id:int, post:Post, db:Session = Depends(get_db)):
 
   post_query.update(post.dict(), synchronize_session=False)
   db.commit()
-  return{"data":post_query.first()}
+  return post_query.first()
 
