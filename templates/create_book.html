@@ -9,6 +9,8 @@
         <button type="submit">add books</button>
     </form> -->
     <div id="bookForms">
-
+        {% for book in books %}
+            {% include 'partials/book_details.html'  %}
+        {% endfor %}
     </div>
 {% endblock %}
