@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from . import models
 from .forms import BookForm, BookFormSet
@@ -5,20 +6,39 @@ from .forms import BookForm, BookFormSet
 # Create your views here.
 def create_book(request, pk):
     author = models.Author.objects.get(pk = pk)
-    formset = BookFormSet(request.POST or None)
-    if request.method == 'POST':
-        if formset.is_valid():
-            formset.instance = author
-            formset.save()
-            return redirect("create_book", pk=author.id)
+    form = BookForm(request.POST or None)
+    books = models.Book.objects.filter(author=author)
+
+    if request.method == "POST":
+        if form.is_valid():
+            book = form.save(commit=False)
+            book.author = author
+            book.save()
+            return redirect("book_details", pk=book.id)
+        else:
+            return render(request, "partials/add_form.html", {"form":form})
+
     context = {
         "author":author,
-        "formset":formset
+        "form":form,
+        "books":books
     }
     return render(request, "create_book.html",context)
 
 def create_book_htmx(request):
     context = {
-        "form":BookForm()
+        "form":BookForm(),
     }
     return render(request, "partials/add_form.html",context)
+
+def book_details(request, pk):
+    book = models.Book.objects.get(pk=pk)
+    context= {
+        "book":book
+    }
+    return render(request, "partials/book_details.html", context)
+
+def book_delete(request, pk):
+    book = models.Book.objects.get(pk=pk)
+    book.delete()
+    return HttpResponse('')
