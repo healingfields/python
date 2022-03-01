@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cardo&family=Dosis:wght@300;400;500&family=Poppins:wght@100;300;400;500;700&family=Rajdhani:wght@300;400;700&family=Staatliches&display=swap" rel="stylesheet"> 
     <script src="https://unpkg.com/htmx.org@1.7.0"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>django + htmx</title>
 </head>
 <body>
-    {% block content %}
+    <div class="py-5 px-4 max-w-3xl mx-auto" style="font-family: Cardo, serif ;">
+        {% block content  %}
     {% endblock %}
+    </div>
+    
     <script>
         document.body.addEventListener('htmx:configRequest', (event) => {
             event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';

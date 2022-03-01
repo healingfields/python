@@ -1,16 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>create book for {{author.name}}</h1>
-    <button hx-get="{% url 'create_book_htmx' %}" hx-target="#bookForms" hx-swap="beforeend">add book</button>
+<div class="flex items-center justify-between" >
+    <div class="flex-1">
+        <h2 class="font-bold text-3xl text-black-500">Create books for {{author.name}}</h2>
+    </div>
+    <div>
+        <button type="button" hx-get="{% url 'create_book_htmx' %}" hx-target="#bookForms" hx-swap="beforeend" class="inline-flex px-4 py-2 border-transparent rounded bg-indigo-500 hover:bg-indigo-700 focus:ring-2">
+        Add book
+        </button>
+    </div>
+       
+</div>
+      
+   
     <!-- <form method="post">
         {% csrf_token %}
         {{formset.management_form}}
         {{formset.as_p}}
         <button type="submit">add books</button>
     </form> -->
-    <div id="bookForms">
+    <div id="bookForms" class="py-3 mt-5">  </div>
+        <div class="border-t border-gray-400">
         {% for book in books %}
             {% include 'partials/book_details.html'  %}
         {% endfor %}
-    </div>
+        </div>
+  
 {% endblock %}

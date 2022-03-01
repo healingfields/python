@@ -31,6 +31,20 @@ def create_book_htmx(request):
     }
     return render(request, "partials/add_form.html",context)
 
+def book_update(request, pk):
+    book = models.Book.objects.get(pk=pk)
+    form = BookForm(request.POST or None, instance=book)
+
+    if request.method == "POST":
+        if form.is_valid():
+            book = form.save()
+            return redirect("book_details", pk=book.id)
+    context = {
+        "form":form,
+        "book":book
+    }
+    return render(request, "partials/add_form.html",context)
+
 def book_details(request, pk):
     book = models.Book.objects.get(pk=pk)
     context= {
