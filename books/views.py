@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from . import models
-from .forms import BookFormSet
+from .forms import BookForm, BookFormSet
 
 # Create your views here.
 def create_book(request, pk):
@@ -16,3 +16,9 @@ def create_book(request, pk):
         "formset":formset
     }
     return render(request, "create_book.html",context)
+
+def create_book_htmx(request):
+    context = {
+        "form":BookForm()
+    }
+    return render(request, "partials/add_form.html",context)
